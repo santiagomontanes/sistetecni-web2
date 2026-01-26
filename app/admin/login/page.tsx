@@ -12,19 +12,30 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { error: authError } = isRegistering
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
-      setError("Credenciales inválidas o usuario no registrado.");
+    if (authError) {
+      setError(
+        isRegistering
+          ? "No se pudo crear el usuario. Verifica el correo y la contraseña."
+          : "Credenciales inválidas o usuario no registrado."
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (isRegistering) {
+      setError("Usuario creado. Ahora puedes iniciar sesión.");
+      setIsRegistering(false);
       setLoading(false);
       return;
     }
@@ -67,7 +78,14 @@ export default function AdminLoginPage() {
               className="w-full rounded-full bg-sky-300 px-6 py-3 text-sm font-semibold text-navy-900 transition hover:bg-white"
               disabled={loading}
             >
-              {loading ? "Ingresando..." : "Entrar"}
+              {loading ? "Procesando..." : isRegistering ? "Crear usuario" : "Entrar"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsRegistering((prev) => !prev)}
+              className="w-full rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-sky-200/40 hover:text-white"
+            >
+              {isRegistering ? "Ya tengo cuenta" : "Crear cuenta"}
             </button>
           </form>
         </div>
