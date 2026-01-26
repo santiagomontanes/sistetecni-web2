@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { SectionHeading } from "@/components/SectionHeading";
-import { FiltersBar } from "@/components/FiltersBar";
-import { products } from "@/data/products";
+import { CatalogClient } from "@/components/catalog/CatalogClient";
 
 export const metadata: Metadata = {
   title: "Catálogo | Sistetecni",
@@ -17,7 +16,7 @@ export default function CatalogPage() {
           title="Laptops HP corporativas listas para entregar"
           description="Filtra por especificaciones y ordena por precio para encontrar tu equipo ideal."
         />
-        <FiltersBar products={products} showSearch showSort />
+        <CatalogClient showSearch showSort />
       </div>
     </main>
   );

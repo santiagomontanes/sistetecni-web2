@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import type { Product } from "@/data/products";
+import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/ProductCard";
 import { cn } from "@/lib/utils";
 
@@ -39,19 +39,19 @@ export function FiltersBar({
       const matchesQuery = query
         ? product.name.toLowerCase().includes(query.toLowerCase())
         : true;
-      const matchesRam = ram === "all" ? true : product.ram === Number(ram);
-      const matchesStorage = storageType === "all" ? true : product.storageType === storageType;
+      const matchesRam = ram === "all" ? true : product.ram_gb === Number(ram);
+      const matchesStorage = storageType === "all" ? true : product.storage_type === storageType;
       const matchesPrice = (() => {
         if (priceRange === "all") return true;
         const [min, max] = priceRange.split("-").map(Number);
-        return product.priceCOP >= min && product.priceCOP <= max;
+        return product.price_cop >= min && product.price_cop <= max;
       })();
       return matchesQuery && matchesRam && matchesStorage && matchesPrice;
     });
 
     if (showSort) {
       return filtered.sort((a, b) =>
-        sort === "asc" ? a.priceCOP - b.priceCOP : b.priceCOP - a.priceCOP
+        sort === "asc" ? a.price_cop - b.price_cop : b.price_cop - a.price_cop
       );
     }
 
@@ -118,7 +118,7 @@ export function FiltersBar({
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {visibleProducts.map((product) => (
-          <ProductCard key={product.slug} product={product} />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
 

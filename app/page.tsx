@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { ShieldCheck, Sparkles, Truck, Zap, Star } from "lucide-react";
-import { products } from "@/data/products";
 import { CTAWhatsApp } from "@/components/CTAWhatsApp";
-import { FiltersBar } from "@/components/FiltersBar";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Steps } from "@/components/Steps";
 import { Testimonials } from "@/components/Testimonials";
 import { FAQAccordion } from "@/components/FAQAccordion";
-
-const featured = products.filter((product) => product.featured).slice(0, 3);
+import { FeaturedProducts } from "@/components/catalog/FeaturedProducts";
+import { CatalogClient } from "@/components/catalog/CatalogClient";
 
 export default function HomePage() {
   return (
@@ -56,25 +54,7 @@ export default function HomePage() {
           <div className="flex-1">
             <div className="rounded-3xl border border-white/10 bg-navy-800/60 p-8 shadow-card">
               <p className="text-sm font-semibold text-sky-200">Destacados del mes</p>
-              <div className="mt-6 space-y-4">
-                {featured.map((item) => (
-                  <div
-                    key={item.slug}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-navy-900/60 p-4"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-white">{item.name}</p>
-                      <p className="text-xs text-slate-400">{item.shortDescription}</p>
-                    </div>
-                    <CTAWhatsApp
-                      productName={item.name}
-                      priceCOP={item.priceCOP}
-                      label="WhatsApp"
-                      className="px-4 py-2 text-xs"
-                    />
-                  </div>
-                ))}
-              </div>
+              <FeaturedProducts />
               <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300">
                 Inventario limitado · Asesoría personalizada en menos de 5 minutos.
               </div>
@@ -127,7 +107,7 @@ export default function HomePage() {
             title="Encuentra tu laptop ideal en minutos"
             description="Filtra por RAM, almacenamiento y precio para seleccionar tu equipo corporativo ideal."
           />
-          <FiltersBar products={products} limit={6} />
+          <CatalogClient limit={6} />
           <div className="text-center">
             <Link
               href="/catalogo"
