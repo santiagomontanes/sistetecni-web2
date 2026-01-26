@@ -8,12 +8,64 @@ import { cn } from "@/lib/utils";
 
 const supabase = createBrowserClient();
 const MAX_IMAGES = 6;
-const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_TOTAL_SIZE = 30 * 1024 * 1024; // 30MB
 
 const bytesAvailable = (usage: StorageUsage | null) =>
   usage ? usage.bytes_limit - usage.bytes_used : 0;
 
 const formatBytes = (value: number) => `${(value / 1024 / 1024).toFixed(2)} MB`;
+
+const compressImage = async (file: File) => {
+  if (file.size <= MAX_IMAGE_SIZE) return file;
+
+  const imageBitmap = await createImageBitmap(file);
+  let scale = 1;
+  let quality = 0.92;
+  let outputBlob: Blob | null = null;
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.floor(imageBitmap.width * scale));
+    canvas.height = Math.max(1, Math.floor(imageBitmap.height * scale));
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      imageBitmap.close?.();
+      throw new Error("No se pudo procesar la imagen.");
+    }
+
+    context.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+
+    outputBlob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality)
+    );
+
+    if (!outputBlob) {
+      imageBitmap.close?.();
+      throw new Error("No se pudo comprimir la imagen.");
+    }
+
+    if (outputBlob.size <= MAX_IMAGE_SIZE) {
+      break;
+    }
+
+    if (quality > 0.6) {
+      quality -= 0.1;
+    } else {
+      scale *= 0.9;
+    }
+  }
+
+  imageBitmap.close?.();
+
+  if (!outputBlob || outputBlob.size > MAX_IMAGE_SIZE) {
+    throw new Error(`No se pudo comprimir ${file.name} a 5MB.`);
+  }
+
+  const newName = file.name.replace(/\.[^.]+$/, ".jpg");
+  return new File([outputBlob], newName, { type: "image/jpeg" });
+};
 
 type ImageUploaderProps = {
   productId: string;
@@ -45,26 +97,41 @@ export function ImageUploader({
       return;
     }
 
-    const available = bytesAvailable(usage);
-    const totalSize = filesArray.reduce((sum, file) => sum + file.size, 0);
-
-    if (totalSize > available) {
-      setError("No hay espacio suficiente para subir estas imágenes.");
-      return;
-    }
-
-    for (const file of filesArray) {
-      if (file.size > MAX_SIZE) {
-        setError(`El archivo ${file.name} supera 2MB.`);
-        return;
-      }
-    }
-
     setUploading(true);
 
     const uploadedImages: ProductImage[] = [];
+    let processedFiles: File[];
 
-    for (const file of filesArray) {
+    try {
+      processedFiles = await Promise.all(filesArray.map((file) => compressImage(file)));
+    } catch (compressionError) {
+      setError(
+        compressionError instanceof Error
+          ? compressionError.message
+          : "No se pudieron procesar las imágenes."
+      );
+      setUploading(false);
+      return;
+    }
+
+    const totalCurrentSize = images.reduce((sum, image) => sum + image.sizeBytes, 0);
+    const totalNewSize = processedFiles.reduce((sum, file) => sum + file.size, 0);
+
+    if (totalCurrentSize + totalNewSize > MAX_TOTAL_SIZE) {
+      setError(`El catálogo permite hasta ${formatBytes(MAX_TOTAL_SIZE)} en total para las imágenes.`);
+      setUploading(false);
+      return;
+    }
+
+    const available = bytesAvailable(usage);
+
+    if (totalNewSize > available) {
+      setError("No hay espacio suficiente para subir estas imágenes.");
+      setUploading(false);
+      return;
+    }
+
+    for (const file of processedFiles) {
       const fileExt = file.name.split(".").pop() ?? "jpg";
       const filePath = `products/${productId}/${crypto.randomUUID()}.${fileExt}`;
 
@@ -152,7 +219,8 @@ export function ImageUploader({
             <span>Subir imágenes (máx {MAX_IMAGES})</span>
           </div>
           <p className="text-xs text-slate-400">
-            Tamaño máximo por imagen: 2MB. Espacio disponible: {formatBytes(bytesAvailable(usage))}.
+            Imágenes mayores a 5MB se comprimen a 5MB. Total máximo: {formatBytes(MAX_TOTAL_SIZE)}.
+            Espacio disponible: {formatBytes(bytesAvailable(usage))}.
           </p>
           <input
             type="file"
