@@ -2,29 +2,54 @@
 
 import { useState } from "react";
 import Image, { type ImageProps } from "next/image";
-import { cn } from "@/lib/utils";
 
-type ImageWithFallbackProps = Omit<ImageProps, "onError">;
+const getImageSrc = (source: ImageProps["src"]) =>
+  typeof source === "string" ? source : source.src;
 
-export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFallbackProps) {
+type ImageWithFallbackProps = ImageProps & {
+  fallbackSrc?: string;
+};
+
+export function ImageWithFallback({
+  src,
+  alt,
+  fallbackSrc,
+  onError,
+  fill,
+  className,
+  width,
+  height,
+  ...rest
+}: ImageWithFallbackProps) {
   const [failed, setFailed] = useState(false);
-  const resolvedSrc = typeof src === "string" ? src : src.src;
 
   if (failed) {
-    const { fill, width, height, ...rest } = props;
-    const fallbackClassName = cn("h-full w-full object-cover", className);
-
+    const resolvedSrc = fallbackSrc ?? getImageSrc(src);
     return (
       <img
         src={resolvedSrc}
         alt={alt}
-        className={fallbackClassName}
-        width={fill ? undefined : width}
-        height={fill ? undefined : height}
-        {...rest}
+        className={className}
+        width={fill ? undefined : (width as number | undefined)}
+        height={fill ? undefined : (height as number | undefined)}
+        style={fill ? { height: "100%", width: "100%", objectFit: "cover" } : undefined}
       />
     );
   }
 
-  return <Image {...props} src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill={fill}
+      className={className}
+      width={fill ? undefined : width}
+      height={fill ? undefined : height}
+      onError={(event) => {
+        setFailed(true);
+        onError?.(event);
+      }}
+      {...rest}
+    />
+  );
 }
