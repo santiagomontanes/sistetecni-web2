@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const supabase = createBrowserClient();
 const MAX_IMAGES = 6;
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_TOTAL_SIZE = 30 * 1024 * 1024; // 30MB
 
 const bytesAvailable = (usage: StorageUsage | null) =>
@@ -60,7 +60,7 @@ const compressImage = async (file: File) => {
   imageBitmap.close?.();
 
   if (!outputBlob || outputBlob.size > MAX_IMAGE_SIZE) {
-    throw new Error(`No se pudo comprimir ${file.name} a 5MB.`);
+    throw new Error(`No se pudo comprimir ${file.name} a 10MB.`);
   }
 
   const newName = file.name.replace(/\.[^.]+$/, ".jpg");
@@ -219,7 +219,7 @@ export function ImageUploader({
             <span>Subir imágenes (máx {MAX_IMAGES})</span>
           </div>
           <p className="text-xs text-slate-400">
-            Imágenes mayores a 5MB se comprimen a 5MB. Total máximo: {formatBytes(MAX_TOTAL_SIZE)}.
+            Imágenes mayores a 10MB se comprimen a 10MB. Total máximo: {formatBytes(MAX_TOTAL_SIZE)}.
             Espacio disponible: {formatBytes(bytesAvailable(usage))}.
           </p>
           <input
