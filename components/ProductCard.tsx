@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { cn, formatCOP } from "@/lib/utils";
 import { CTAWhatsApp } from "@/components/CTAWhatsApp";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 const placeholderImage = "/images/laptop-placeholder.svg";
 
@@ -24,7 +24,7 @@ export function ProductCard({ product, showDetail = true, className }: ProductCa
       )}
     >
       <div className="relative h-44 w-full overflow-hidden bg-navy-700">
-        <Image src={imageUrl} alt={product.name} fill className="object-cover" />
+        <ImageWithFallback src={imageUrl} alt={product.name} fill className="object-cover" />
         <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-sky-100">
           <BadgeCheck className="h-3 w-3" />
           Batería nueva
