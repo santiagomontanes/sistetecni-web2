@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle2, ShieldCheck, Truck } from "lucide-react";
 import { CTAWhatsApp } from "@/components/CTAWhatsApp";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { formatCOP } from "@/lib/utils";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Product, ProductImage } from "@/lib/types";
@@ -33,19 +33,25 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
         </Link>
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="space-y-4">
-            <div className="relative h-72 w-full overflow-hidden rounded-3xl border border-white/10 bg-navy-800/60">
-              <Image src={images[0].url} alt={product.name} fill className="object-cover" />
+             <ImageWithFallback src={images[0].url} alt={product.name} fill className="object-cover" />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {images.slice(0, 2).map((image, index) => (
-                <div
-                  key={index}
-                  className="relative h-40 overflow-hidden rounded-2xl border border-white/10 bg-navy-800/60"
-                >
-                  <Image src={image.url} alt={`${product.name} ${index + 1}`} fill className="object-cover" />
-                </div>
-              ))}
-            </div>
+            {images.length > 1 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {images.slice(1).map((image, index) => (
+                  <div
+                    key={`${image.url}-${index}`}
+                    className="relative h-40 overflow-hidden rounded-2xl border border-white/10 bg-navy-800/60"
+                  >
+                    <ImageWithFallback
+                      src={image.url}
+                      alt={`${product.name} ${index + 2}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
           <div className="space-y-6">
             <div>
