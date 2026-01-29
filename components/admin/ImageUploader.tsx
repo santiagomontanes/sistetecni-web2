@@ -67,8 +67,6 @@ const compressImage = async (file: File) => {
   return new File([outputBlob], newName, { type: "image/jpeg" });
 };
 
-
-
 type ImageUploaderProps = {
   productId: string;
   images: ProductImage[];
@@ -101,7 +99,13 @@ export function ImageUploader({
 
     setUploading(true);
 
-       const uploadedImages: ProductImage[] = [];
+    if (!usage) {
+      setError("No se encontró información de almacenamiento.");
+      setUploading(false);
+      return;
+    }
+
+    const uploadedImages: ProductImage[] = [];
     let processedFiles: File[];
 
     try {
@@ -116,7 +120,7 @@ export function ImageUploader({
       return;
     }
 
-      const totalCurrentSize = images.reduce((sum, image) => sum + image.sizeBytes, 0);
+    const totalCurrentSize = images.reduce((sum, image) => sum + image.sizeBytes, 0);
     const totalNewSize = processedFiles.reduce((sum, file) => sum + file.size, 0);
 
     if (totalCurrentSize + totalNewSize > MAX_TOTAL_SIZE) {
@@ -221,7 +225,7 @@ export function ImageUploader({
             <span>Subir imágenes (máx {MAX_IMAGES})</span>
           </div>
           <p className="text-xs text-slate-400">
-           Imágenes mayores a 10MB se comprimen a 10MB. Total máximo: {formatBytes(MAX_TOTAL_SIZE)}.
+            Imágenes mayores a 10MB se comprimen a 10MB. Total máximo: {formatBytes(MAX_TOTAL_SIZE)}.
             Espacio disponible: {formatBytes(bytesAvailable(usage))}.
           </p>
           <input
