@@ -33,7 +33,8 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
         </Link>
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="space-y-4">
-             <ImageWithFallback src={images[0].url} alt={product.name} fill className="object-cover" />
+            <div className="relative h-72 w-full overflow-hidden rounded-3xl border border-white/10 bg-navy-800/60">
+              <ImageWithFallback src={images[0].url} alt={product.name} fill className="object-cover" />
             </div>
             {images.length > 1 ? (
               <div className="grid gap-4 sm:grid-cols-2">
