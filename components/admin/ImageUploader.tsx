@@ -99,6 +99,12 @@ export function ImageUploader({
 
     setUploading(true);
 
+    if (!usage) {
+      setError("No se encontró información de almacenamiento.");
+      setUploading(false);
+      return;
+    }
+
     const uploadedImages: ProductImage[] = [];
     let processedFiles: File[];
 
