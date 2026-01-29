@@ -1,9 +1,9 @@
-import { ImageWithFallback } from "@/components/ImageWithFallback";
 import Link from "next/link";
 import { BadgeCheck } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { cn, formatCOP } from "@/lib/utils";
 import { CTAWhatsApp } from "@/components/CTAWhatsApp";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 const placeholderImage = "/images/laptop-placeholder.svg";
 
